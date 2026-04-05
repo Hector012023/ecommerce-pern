@@ -10,4 +10,5 @@ app.use(express.json());
 //Todas las rutas de productos comienzan con /api/products
 app.use("/api/products", productRoutes);
 
+
 export default app;
