@@ -5,6 +5,8 @@ import {
   updateProduct,
   deleteProduct,
 } from "../services/product.service";
+import { createProductSchema } from "../validators/product.validator";
+import { ZodError } from "zod";
 
 //Controlador: obtiene productos
 export const getProducts = async (req: Request, res: Response) => {
@@ -17,42 +19,16 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const createProductController = async (req: Request, res: Response) => {
   try {
-    const { name, price } = req.body;
+    const data = createProductSchema.parse(req.body);
 
-    // 1. Validar existencia
-    if (!name) {
-      return res.status(400).json({
-        message: "El nombre es requerido",
-      });
-    }
-
-    if (price === undefined) {
-      return res.status(400).json({
-        message: "El precio es requerido",
-      });
-    }
-
-    // 2. Validar tipo
-    if (typeof price !== "number") {
-      return res.status(400).json({
-        message: "El precio debe ser un número",
-      });
-    }
-
-    // 3. Regla de negocio (opcional pero recomendable)
-    if (price <= 0) {
-      return res.status(400).json({
-        message: "El precio no puede ser negativo",
-      });
-    }
-
-    const product = await createProduct({ name, price });
+    const product = await createProduct(data);
 
     res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({
-      message: "Error al crear el producto.",
-    });
+    if (error instanceof ZodError) {
+      return res.status(400).json({ errors: error.issues });
+    }
+    res.status(500).json({ message: "Error al crear el producto" });
   }
 };
 

@@ -1,16 +1,16 @@
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import { db } from "../db";
 import { products } from "../db/schema";
 
 //Servicio obtener productos
 export const fetchProducts = async () => {
-  return await db.select().from(products);
+  return await db.select().from(products).orderBy(asc(products.id));
 };
 
 //Servicio crear producto
 export const createProduct = async (data: { name: string; price: number }) => {
-  const result = await db.insert(products).values(data).returning();
-  return result[0];
+  const [product] = await db.insert(products).values(data).returning();
+  return product;
 };
 
 //Servicio actualizar producto
